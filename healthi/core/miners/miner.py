@@ -335,7 +335,7 @@ class HealthiMiner(BaseNeuron):
             f'Processed EHR: {output["EHR"]} with predictor: {output["task"]}'
         )
         bt.logging.success(
-            f'Processed synapse from UID: {self.metagraph.hotkeys.index(synapse.dendrite.hotkey)} - Probs: {output["predicted_probs"]}'
+            f'Processed synapse from UID: {self.metagraph.hotkeys.index(synapse.dendrite.hotkey)} - Predicted Probs: {output["predicted_probs"]}'
         )
 
         return synapse

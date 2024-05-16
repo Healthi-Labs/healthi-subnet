@@ -217,7 +217,7 @@ if __name__ == "__main__":
         type=float,
         help="The weight moving average scoring.",
     )
-    parser.add_argument("--netuid", type=int, default=14, help="The chain subnet uid.")
+    parser.add_argument("--netuid", type=int, default=34, help="The chain subnet uid.")
 
     parser.add_argument(
         "--load_state",

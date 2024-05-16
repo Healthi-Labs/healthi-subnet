@@ -451,7 +451,7 @@ class HealthiValidator(BaseNeuron):
             )
             if not validate_data(entry):
                 bt.logging.warning(
-                    f"Received data from API '{entry}' but the validation failed. Using local data instead."
+                    f"{entry} Using local data instead."
                 )
                 self.data_entry = self.get_local_data(
                     hotkey = self.wallet.hotkey.ss58_address
