@@ -1,0 +1,1 @@
+DATA_API_URL = 'http://www.healthi-api.com:8000/api'
