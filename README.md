@@ -77,6 +77,10 @@ $ bash scripts/run.sh \
 --wallet.hotkey {hot_wallet_name}
 ```
 
+To verify whether your miner is effectively responding to queries from validators, run the following commands (If you've recently started the miner, allow a few minutes):
+```
+cat ~/.pm2/logs/healthi-miner-out.log | grep "SUCCESS"
+```
 <h1 id="FAQ">FAQ</h1>
 
 <details>
