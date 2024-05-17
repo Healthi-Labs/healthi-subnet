@@ -28,7 +28,7 @@ def main(miner: HealthiMiner):
     # Attach the miner functions to the Axon
     axon.attach(
         forward_fn=miner.forward,
-        #blacklist_fn=miner.blacklist,
+        blacklist_fn=miner.blacklist,
         priority_fn=miner.priority,
     )
     bt.logging.info(f"Attached functions to Axon: {axon}")

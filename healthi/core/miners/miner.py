@@ -37,8 +37,7 @@ class HealthiMiner(BaseNeuron):
             An int instance representing the unique identifier of the miner in the network returned
             from the setup() method.
         hotkey_blacklisted:
-            A boolean flag indicating whether the miner's hotkey is blacklisted. It is initially
-            set to False and may be updated by the check_remote_blacklist() method.
+            A boolean flag indicating whether the miner's hotkey is blacklisted.
 
     Methods:
         setup():
@@ -58,9 +57,6 @@ class HealthiMiner(BaseNeuron):
         calculate_overall_confidence():
             This function calculates the overall confidence score for a ehr
             injection.
-        check_remote_blacklist():
-            This function retrieves the remote blacklist (from the url:
-            https://ujetecvbvi.execute-api.eu-west-1.amazonaws.com/default/sn{id}-blacklist-api)
     """
 
     def __init__(self, parser: ArgumentParser):
@@ -340,5 +336,3 @@ class HealthiMiner(BaseNeuron):
 
         return synapse
 
-    def check_remote_blacklist(self):
-        return None

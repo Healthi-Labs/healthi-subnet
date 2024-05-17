@@ -45,7 +45,7 @@ btcli subnet register --netuid 133 --wallet.name {cold_wallet_name} --wallet.hot
 > [!NOTE]  
 > Validators need to establish an internet connection with the miner. This requires ensuring that the port specified in --axon.port is reachable on the virtual machine via the internet. This involves either opening the port on the firewall or configuring port forwarding.
 
-If you want to run on testnet, set netuid to 133, and add --subtensor.network test. 
+If you want to run on testnet, set netuid to 133, and add --validator_min_stake 0.0 --subtensor.network test.
 
 Run miner:
 ```
