@@ -192,8 +192,44 @@ class HealthiValidator(BaseNeuron):
         response_data = []
         responses_invalid_uids = []
         responses_valid_uids = []
-        last_time_scores = deepcopy(self.scores)
+
+        current_scores = {}
         # Check each response
+        for i, response in enumerate(responses):
+            # Get the hotkey for the response
+            hotkey = self.metagraph.hotkeys[processed_uids[i]]
+            # data entry keys: task, weight, hotkey, created_at, EHR, admission time, label
+            # miner output keys: task, EHR, predicted_probs, subnet_version, nonce, timestamp, signature 
+
+            # Set the score for invalid responses to 0.0
+            if not scoring.process.validate_response(hotkey, response.output):
+                current_scores[processed_uids[i]] = 0.0
+                responses_invalid_uids.append(processed_uids[i])
+            else:
+                response_time = response.dendrite.process_time
+                scored_response = self.calculate_score(
+                    response.output, target, query["label_weight"], response_time, hotkey
+                )
+                current_scores[processed_uids[i]] = scored_response["scores"]["total"]
+                responses_valid_uids.append(processed_uids[i])
+        
+        bt.logging.info(f"Received valid responses from UIDs: {responses_valid_uids}")
+        bt.logging.info(f"Received invalid responses from UIDs: {responses_invalid_uids}")
+        
+        # reajust current scores for current_scores
+        bt.logging.info(f"Uid current scores before rejusting: {current_scores}")
+        valid_scores = [current_scores[uid] for uid in responses_valid_uids]
+        threshold = np.percentile(valid_scores, 80)
+        for uid in current_scores:
+            if uid in responses_valid_uids:
+                if current_scores[uid] >= threshold:
+                    current_scores[uid] = current_scores[uid] * 0.8
+                else:
+                    current_scores[uid] = current_scores[uid] * 0.2
+        bt.logging.info(f"Uid current scores before rejusting: {current_scores}")
+        
+        
+        # make response object and assign scores
         for i, response in enumerate(responses):
             # Get the hotkey for the response
             hotkey = self.metagraph.hotkeys[processed_uids[i]]
@@ -204,39 +240,17 @@ class HealthiValidator(BaseNeuron):
                 processed_uids[i], hotkey, target, query["EHR"]
             )
 
-            # Set the score for invalid responses to 0.0
-            if not scoring.process.validate_response(hotkey, response.output):
-                self.scores, old_score, unweighted_new_score = (
-                    scoring.process.assign_score_for_uid(
-                        self.scores,
-                        processed_uids[i],
-                        self.neuron_config.alpha,
-                        0.0,
-                        query["weight"],
-                        query["label_weight"]
-                    )
+            self.scores, old_score, unweighted_new_score = (
+                scoring.process.assign_score_for_uid(
+                    self.scores,
+                    processed_uids[i],
+                    self.neuron_config.alpha,
+                    current_scores[processed_uids[i]],
+                    query["weight"],
+                    query["label_weight"]
                 )
-                responses_invalid_uids.append(processed_uids[i])
-
-            # Calculate score for valid response
-            else:
-                response_time = response.dendrite.process_time
-
-                scored_response = self.calculate_score(
-                    response.output, target, query["label_weight"], response_time, hotkey
-                )
-
-                self.scores, old_score, unweighted_new_score = (
-                    scoring.process.assign_score_for_uid(
-                        self.scores,
-                        processed_uids[i],
-                        self.neuron_config.alpha,
-                        scored_response["scores"]["total"],
-                        query["weight"],
-                        query["label_weight"]
-                    )
-                )
-
+            )
+            if scoring.process.validate_response(hotkey, response.output):
                 miner_response = {
                     "EHR": response.output["EHR"],
                     "predicted_probs": response.output["predicted_probs"],
@@ -245,7 +259,6 @@ class HealthiValidator(BaseNeuron):
                     "timestamp": response.output["timestamp"],
                 }
 
-                responses_valid_uids.append(processed_uids[i])
 
                 if response.output["subnet_version"]:
                     if response.output["subnet_version"] > self.subnet_version:
@@ -253,38 +266,20 @@ class HealthiValidator(BaseNeuron):
                             f'Received a response from a miner with higher subnet version ({response.output["subnet_version"]}) than yours ({self.subnet_version}). Please update the validator.'
                         )
 
-                # Populate response data
-                response_object["response"] = miner_response
-                response_object["scored_response"] = scored_response
-                response_object["weight_scores"] = {
-                    "new": float(self.scores[processed_uids[i]]),
-                    "old": float(old_score),
-                    "change": float(self.scores[processed_uids[i]]) - float(old_score),
-                    "unweighted": unweighted_new_score,
-                    "weight": query["weight"],
-                }
+                    # Populate response data
+                    response_object["response"] = miner_response
+                    response_object["scored_response"] = scored_response
+                    response_object["weight_scores"] = {
+                        "new": float(self.scores[processed_uids[i]]),
+                        "old": float(old_score),
+                        "change": float(self.scores[processed_uids[i]]) - float(old_score),
+                        "unweighted": unweighted_new_score,
+                        "weight": query["weight"],
+                    }
 
+                bt.logging.debug(f"Processed response: {response_object}")
+                response_data.append(response_object)
 
-            bt.logging.debug(f"Processed response: {response_object}")
-
-            response_data.append(response_object)
-        bt.logging.info(f"Received valid responses from UIDs: {responses_valid_uids}")
-        bt.logging.info(
-            f"Received invalid responses from UIDs: {responses_invalid_uids}"
-        )
-
-        bt.logging.info(f"Rejusting scores based on rankings")
-        bt.logging.info(f"Ranking Rejusting before scores:", self.scores)
-
-        diff_scores = deepcopy(self.scores) - last_time_scores
-        k = int(len(responses_valid_uids) * 0.2)
-        topkvalue, topkindex = torch.topk(diff_scores, k)
-        diff_scores = diff_scores * 0.2
-        diff_scores[topkindex] = diff_scores[topkindex] * 4
-
-        self.scores = last_time_scores + diff_scores
-        
-        bt.logging.info(f"Ranking Rejusting after scores:", self.scores)
 
         return response_data
 
