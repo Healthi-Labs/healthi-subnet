@@ -173,7 +173,6 @@ class HealthiMiner(BaseNeuron):
             return False
 
         whitelisted_hotkeys = [
-            "5HgUfGFfdCmMTQXHrjXKcsLVwi5ffwxAyS58fLGFcKPw4gGq",  # dev validator
         ]
 
         if hotkey in whitelisted_hotkeys:
