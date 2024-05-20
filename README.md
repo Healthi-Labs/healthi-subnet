@@ -18,8 +18,8 @@ This repository hosts the source code for the Healthi subnet, which operates ato
 In the rapidly advancing field of healthcare technology, AI integration is transforming preventive medicine, particularly through predictive diagnostics. The increasing availability of patient data, especially EHRs, presents a significant opportunity to leverage AI for predicting health outcomes. This subnet on the Bittensor network rewards miners based on their AI models' performance in clinical prediction tasks, such as disease forecasting using EHRs. Our network aims to utilize these high-performing AI models developed by miners to improve patient outcomes, enhance healthcare delivery, and promote personalized clinical risk management.
 
 # Quickstart
-This repository requires Python 3.10 or higher and Ubuntu 22.04/Debian 12.
-
+This repository requires Python 3.10 or higher and Ubuntu 22.04/Debian 12.\
+We recommend creating a Python virtual environment (venv); using conda may cause errors. \
 Installation (omit the first line if Bittensor is already installed):
 ```
 $ /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/opentensor/bittensor/master/scripts/install.sh)"
