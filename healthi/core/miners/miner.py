@@ -14,7 +14,7 @@ from healthi.base.neuron import BaseNeuron
 from healthi.base.protocol import HealthiProtocol
 from healthi.base.utils import validate_miner_blacklist, validate_signature
 from healthi.core.miners.tasks.disease_prediction.model import DiseasePredictor
-
+import time
 
 class HealthiMiner(BaseNeuron):
     """
@@ -318,8 +318,14 @@ class HealthiMiner(BaseNeuron):
         # Execute the correct task
         # output keys: task, EHR, predicted_probs, subnet_version, nonce, timestamp, signature 
         if synapse.task == "Disease Prediction":
-            print(f"Executing the {synapse.task} model")
+            print(f"Executing the {synapse.task} model ...")
+            start_time = time.time()
             output = self.tasks["Disease Prediction"].execute(synapse=synapse)
+            end_time = time.time()
+            execution_time = end_time - start_time
+            minutes, seconds = divmod(execution_time, 60)
+            print(f"Execution time for the current sample is {int(minutes)} minute(s) and {seconds:.6f} seconds.")
+
         else:
             bt.logging.error(
                 f"Unable to process synapse: {synapse} due to invalid task: {synapse.task}"
