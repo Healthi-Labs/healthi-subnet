@@ -170,12 +170,14 @@ def main(validator: HealthiValidator):
             # Print stats
             bt.logging.debug(f"Scores: {validator.scores}")
             bt.logging.debug(f"Processed UIDs: {list(list_of_uids)}")
+            
+            # return data to api for dashboard
 
             current_block = validator.subtensor.block
             bt.logging.debug(
                 f"Current step: {validator.step}. Current block: {current_block}. Last updated block: {validator.last_updated_block}"
             )
-
+            
             if current_block - validator.last_updated_block > 100:
                 # Periodically update the weights on the Bittensor blockchain.
                 try:
