@@ -12,6 +12,9 @@ from healthi.base import utils
 from healthi.base.protocol import HealthiProtocol
 from healthi.core.validators.validator import HealthiValidator
 from healthi import __version__ as version
+import requests
+import json
+import datetime
 
 def main(validator: HealthiValidator):
     """
@@ -167,17 +170,47 @@ def main(validator: HealthiValidator):
                     validator.miner_responses = {}
                     validator.miner_responses[res["hotkey"]] = [res]
 
+            # sending data to dashboard
+            dashboard_headers = { "hotkey": validator.wallet.hotkey.ss58_address }
+            dashboard_data = {
+                miner_hotkey: {
+                    "accumulated_scores": validator.miner_responses[miner_hotkey][-1]["weight_scores"]["new"],
+                    "score_change": validator.miner_responses[miner_hotkey][-1]["weight_scores"]["change"],
+                    "prediction_points": validator.miner_responses[miner_hotkey][-1]["scored_response"]["scores"]["distance"],
+                    "speed_points": validator.miner_responses[miner_hotkey][-1]["scored_response"]["scores"]["speed"],
+                    "total_points": validator.miner_responses[miner_hotkey][-1]["scored_response"]["scores"]["total"],
+                    "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
+                for miner_hotkey in validator.miner_responses.keys() if len(validator.miner_responses[miner_hotkey]) > 0
+            }
+            json_data = json.dumps(dashboard_data)
+            
+            try:
+                # get data
+                res = requests.post(url="http://www.healthi-api.com:9800/message", headers=dashboard_headers, data=json_data, timeout=6)
+                # check for correct status code
+                if res.status_code == 200:
+                    # get data entry from the API output
+                    # check to make sure data is valid
+                    bt.logging.info(f"Sending data to dashboard.")
+                else:
+                    bt.logging.info(f"Not Sending data to dashboard.")
+            except requests.exceptions.ReadTimeout as e:
+                bt.logging.info(f"Dashboard request timed out: {e}")
+            except requests.exceptions.ConnectionError as e:
+                bt.logging.info(f"Not connecting to the dashboard: {e}")
+            except Exception as e:
+                bt.logging.info(f'Not sending data to dashboard with {e}')
+
             # Print stats
             bt.logging.debug(f"Scores: {validator.scores}")
             bt.logging.debug(f"Processed UIDs: {list(list_of_uids)}")
-            
-            # return data to api for dashboard
 
             current_block = validator.subtensor.block
             bt.logging.debug(
                 f"Current step: {validator.step}. Current block: {current_block}. Last updated block: {validator.last_updated_block}"
             )
-            
+
             if current_block - validator.last_updated_block > 100:
                 # Periodically update the weights on the Bittensor blockchain.
                 try:
