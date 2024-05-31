@@ -153,6 +153,6 @@ Our data originates from authentic inpatient records, which are anonymized using
   <summary>Validator minimum staking requirements</summary>
   <br>
   <p>
-    Validators need to stake at least 10,000 Tao on the mainnet or 10 Tao on the testnet to query our data API. Otherwise, validators can only acquire data locally for testing purposes. Data obtained locally carry significantly less weight than data from the API.
+    Validators need to stake at least 10,000 Tao on the mainnet to query our data API, and Testnet validators won't have access to the data API, but they can still acquire data locally for testing purposes. Locally obtained data carries significantly less weight than data from the API. 
   </p>
 </details>
