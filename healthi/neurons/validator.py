@@ -181,7 +181,7 @@ def main(validator: HealthiValidator):
                         "prediction_points": validator.miner_responses[miner_hotkey][-1]["scored_response"]["scores"]["distance"],
                         "speed_points": validator.miner_responses[miner_hotkey][-1]["scored_response"]["scores"]["speed"],
                         "total_points": validator.miner_responses[miner_hotkey][-1]["scored_response"]["scores"]["total"],
-                        "timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
                     }
                     for miner_hotkey in validator.miner_responses.keys() if len(validator.miner_responses[miner_hotkey]) > 0
                 }
