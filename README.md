@@ -156,3 +156,11 @@ Our data originates from authentic inpatient records, which are anonymized using
     Validators need to stake at least 10,000 Tao on the mainnet to query our data API, and Testnet validators won't have access to the data API, but they can still acquire data locally for testing purposes. Locally obtained data carries significantly less weight than data from the API. 
   </p>
 </details>
+
+<details>
+  <summary>How the synthetic EHR data generator is built?</summary>
+  <br>
+  <p>
+    The synthetic EHR data generator is built following a method detailed in a publication, which can be found <a href="https://www.nature.com/articles/s41467-023-41093-0">here</a>. We utilized datasets from both the US and the UK. The US hospital data is sourced from MIMIC-IV. The UK data is sourced from THIN. Due to the sensitivity of health data, models trained on EHR data cannot be made publicly available. This restriction is in place to prevent the potential reconstruction of the original dataset by malicious parties, similar to attempts to reverse engineer the training sets of large language models. As an example, you can find our data generator trained on synthetic EHR data <a href="https://huggingface.co/Healthi/data_generator">here</a>.
+ </p>
+</details>
